@@ -1,0 +1,58 @@
+---
+description: DOC Manager monorepo architecture, delivery order, UI and Jira conventions
+alwaysApply: true
+---
+
+# DOC Manager — architecture & delivery
+
+Stack: Next.js 15 App Router · React 19 · Tailwind 4 · Supabase · Tesseract · DeepSeek · TanStack Query · Turborepo · Render.
+
+## Monorepo layout
+
+```
+apps/web            # UI + Route Handlers (BFF)
+apps/worker-ocr     # OCR / classify / PDF jobs
+apps/worker-notify  # email + WhatsApp (Twilio)
+packages/ui         # @ac/ui design system
+packages/shared     # @ac/shared enums, Zod, event contracts
+packages/db         # migrations / generated types (or supabase/)
+supabase/migrations
+```
+
+## Non-negotiable decisions
+
+- **Queue in Postgres** (`document_jobs` / pg-boss) — no Kafka/RabbitMQ.
+- **Search in Postgres** (tsvector + GIN + `pg_trgm`) — no Elasticsearch.
+- **Archive is metadata-driven** — do not move Storage objects to “organize”.
+- **OCR and heavy PDF work only in workers** — never in the browser / Route Handler sync path.
+- **DeepSeek responses must pass Zod** before persist; low confidence → `needs_review`.
+- **Multi-tenant via `org_id` + RLS**; no service-role usage in client code.
+- **Single contract source:** `@ac/shared` shared by web + workers.
+
+## Delivery order (do not skip ahead)
+
+**Backend (Jira `E0`–`E15`):** scaffolding/contracts → DB/Auth/RLS → upload skeleton → jobs → OCR (+ calibration) → DeepSeek → taxonomy → search → workflow/ERP → share → PDF → notify → Giulia → PWA → RGPD → release.
+
+**UI (Jira `UI0`–`UI14`):** Design System → layouts → navigation → pages as composition → motion → polish.
+
+Never build Landing/Dashboard/feature pages before `@ac/ui` tokens + primitives exist. Prefer composing existing components over new one-offs.
+
+## UI / design system
+
+- Tokens and components live in `packages/ui`; apps consume, don’t fork styles.
+- Design language: premium AI SaaS (Vercel/Linear/Stripe-like) — white surfaces, **blue accents**, large spacing, high radius, soft shadows, enterprise minimalism. Brand **DOC Manager**.
+- Prefer design tokens / theme classes over one-off hex and arbitrary Tailwind values.
+- Icons: Lucide via shared `Icon` wrapper (size/stroke/color standardized).
+- Full UI workflow/quality bar: see `ai-development-workflow` rule.
+
+## Jira conventions
+
+- Technical: `[E{n}.{mm}] …` under workstreams `DM` labels `etapa-n`.
+- UI: `[UI{n}.{mm}] …` labels `ui`, `ui-etapa-n`.
+- OCR filter calibration: `[E4.06]` / harness in `worker-ocr` only.
+- When implementing a ticket: respect **Paths**, **Depende de**, **Fora de escopo** on the issue.
+- AI status path only: **In Progress** → **Testing** → **Completed AI** (never **Completed Human**).
+
+## Parallel tracks
+
+UI can advance on mocks while backend tickets land, but **API/UI contracts must match `@ac/shared`**. Do not invent a second DTO shape in the frontend.

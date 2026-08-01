@@ -1,0 +1,133 @@
+---
+description: Minimal diffs, production-safe edits, token-efficient agent behavior
+alwaysApply: true
+---
+
+# Production Mode
+
+Default posture: **Implement the requested change with the smallest safe diff possible.**
+
+For **Jira ticket delivery**, follow `ai-development-workflow` (plan → implement → review → tests → UAT → build → `/Doc` → status transitions). Minimal-diff still applies to *how* you edit (surgical diffs, no drive-by refactors); it does **not** excuse skipping required ticket tests, validation, or documentation.
+
+## Priority order
+
+1. Never break existing functionality.
+2. Make the smallest possible code changes that still meet the workflow quality bar.
+3. Minimize context/token usage without sacrificing correctness or required analysis.
+4. Reuse existing code before creating new code.
+5. Keep responses concise.
+6. Prefer Tailwind scale utilities over arbitrary values (e.g. `max-w-56` not `max-w-[14rem]`).
+
+## Token budget (HIGH PRIORITY)
+
+- Assume context is expensive.
+- Analyze related architecture for the ticket — do not scan the whole repo “just in case”.
+- After finding the relevant implementation, stop searching.
+- Prefer symbol/targeted search over opening large files.
+- Never read a file twice unless necessary.
+- Reuse previous findings instead of searching again.
+
+## Before editing
+
+- Understand the existing flow before changing it.
+- Read only files directly related to the task.
+- If requirements are ambiguous, ask one focused question instead of guessing.
+- Search for an existing implementation before creating a new one.
+
+## Existing code first
+
+- Reuse services, components, utilities, hooks, validators and helpers.
+- Extend existing implementations; do not duplicate logic or create parallel paths.
+
+## Change budget
+
+- Touch only required files; keep diffs surgical.
+- Never rewrite a whole file when a localized edit works.
+- Do not move code or reformat unrelated lines.
+- Avoid drive-by cleanup, comment churn, or unrelated refactors.
+
+## Simplicity
+
+- Prefer the simplest working solution.
+- Do not over-engineer, redesign architecture, or optimize unless explicitly requested.
+- Avoid abstractions for one-time logic.
+- Avoid new files unless necessary.
+
+## Preserve behavior
+
+- Never change unrelated behavior or weaken backwards compatibility.
+- Do not rename APIs, routes, models, DTOs or contracts unless explicitly requested.
+- Preserve UI behavior, copy, config and env unless required.
+- Match existing coding style and patterns.
+
+## Production safety
+
+- Assume production is live.
+- Never weaken auth/authorization/security or expose secrets (`.env`, tokens).
+- Do not run destructive Git commands unless explicitly requested.
+- Fix only errors introduced by your own changes.
+
+## Verification
+
+- Ad-hoc small fixes: targeted checks are enough.
+- **Jira tickets:** run the validation required by `ai-development-workflow` (typecheck, lint, tests, build as available) before moving to Testing / Completed AI.
+- If a required check cannot run, state what was not verified and block Completed AI until resolved.
+
+## Responses
+
+- Be concise.
+- For Jira tickets: include the required plan, then what changed / why / manual steps / UAT pointer.
+- For small non-ticket fixes: what changed, why, any manual step — no padding.
+
+## Stop and ask if
+
+- Multiple implementations would change product behavior.
+- Required information is missing.
+- The change could break production behavior.
+- Scope is larger than described.
+
+## Large changes
+
+If the work needs architecture changes, >10 files, or removing a subsystem:
+
+1. Diagnose first.
+2. Present a migration plan.
+3. Wait for approval before implementing.
+
+## Framework boundaries
+
+- Never import server-only APIs into client code.
+- Next.js: `next/headers`, cookies, server actions, RSC-only utils stay in server contexts (`app/` server files, route handlers, middleware-compatible code).
+- Before reusing a helper, check server-only / browser-only / Node-only imports.
+- Split shared logic into runtime-safe helpers when needed (pure / server / client / middleware).
+
+## Type safety
+
+- Never silence TS with `as any`, broad casts, or unsafe fallbacks.
+- Do not change types only to make the build pass.
+- Normalize/validate DB, JSON, and API values before assigning to typed fields.
+- Prefer small runtime guards for `unknown` / unexpected shapes.
+- Keep DTOs, audit payloads, route params, and Supabase types explicit.
+
+## Build integrity
+
+- Modified code must be valid for the target runtime (client, server, middleware, App Router).
+- Fix TypeScript/build errors you introduce before considering the task done.
+
+## Dependency awareness
+
+- Inspect imports before reuse; never pull incompatible framework deps across boundaries.
+- Prefer framework-agnostic shared utilities over cross-runtime imports.
+
+## Respect the existing architecture
+
+- Follow established project patterns; do not invent a parallel stack.
+- Before new abstractions, check that an equivalent pattern does not already exist.
+- Contracts live in `@ac/shared` — never redefine enums/Zod schemas locally in apps.
+
+## Root cause first
+
+- Fix the root cause, not only the symptom.
+- No temporary workarounds unless explicitly requested.
+
+**Ship the minimum. Break nothing.**

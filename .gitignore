@@ -1,0 +1,26 @@
+node_modules
+.turbo
+dist
+.next
+coverage
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+*.tsbuildinfo
+
+# Local / ephemeral
+_gen_*.py
+_tmp_*.py
+**/__pycache__/
+*.pyc
+**/test-results/
+**/playwright-report/
+**/.vercel/
+*.broken
+node_modules.lucide-react.broken/
+.cursor/settings.json
+scripts/_debug_*.py
+scripts/_open_tasks.txt
+scripts/_dump_*.py

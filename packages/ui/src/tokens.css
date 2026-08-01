@@ -1,0 +1,109 @@
+/**
+ * Design tokens as CSS custom properties + Tailwind 4 @theme bridge.
+ * Import from apps via: `@import "@ac/ui/tokens.css";`
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Color */
+  --dm-color-background: #ffffff;
+  --dm-color-foreground: #0f172a;
+  --dm-color-muted: #64748b;
+  --dm-color-border: #e2e8f0;
+  --dm-color-accent: #2563eb;
+  --dm-color-accent-hover: #1d4ed8;
+  --dm-color-accent-muted: #eff6ff;
+  --dm-color-success: #059669;
+  --dm-color-warning: #d97706;
+  --dm-color-danger: #dc2626;
+  --dm-color-ring: #93c5fd;
+  --dm-color-card: #ffffff;
+  --dm-color-overlay: rgb(15 23 42 / 0.45);
+
+  /* Radius — large, soft corners */
+  --dm-radius-sm: 0.5rem;
+  --dm-radius-md: 0.75rem;
+  --dm-radius-lg: 1rem;
+  --dm-radius-xl: 1.5rem;
+  --dm-radius-full: 9999px;
+
+  /* Soft shadows */
+  --dm-shadow-sm: 0 1px 2px rgb(15 23 42 / 0.05);
+  --dm-shadow-md: 0 4px 16px rgb(15 23 42 / 0.08);
+  --dm-shadow-lg: 0 12px 40px rgb(15 23 42 / 0.1);
+
+  /* Spacing scale */
+  --dm-space-1: 0.25rem;
+  --dm-space-2: 0.5rem;
+  --dm-space-3: 0.75rem;
+  --dm-space-4: 1rem;
+  --dm-space-6: 1.5rem;
+  --dm-space-8: 2rem;
+  --dm-space-12: 3rem;
+
+  /* Typography */
+  --dm-font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --dm-font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --dm-text-xs: 0.75rem;
+  --dm-text-sm: 0.875rem;
+  --dm-text-md: 1rem;
+  --dm-text-lg: 1.125rem;
+  --dm-text-xl: 1.25rem;
+  --dm-text-2xl: 1.5rem;
+
+  /* Motion */
+  --dm-motion-fast: 120ms;
+  --dm-motion-normal: 200ms;
+  --dm-motion-slow: 320ms;
+}
+
+.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --dm-color-background: #0b1220;
+  --dm-color-foreground: #e2e8f0;
+  --dm-color-muted: #94a3b8;
+  --dm-color-border: #1e293b;
+  --dm-color-accent: #3b82f6;
+  --dm-color-accent-hover: #60a5fa;
+  --dm-color-accent-muted: #1e3a8a;
+  --dm-color-success: #34d399;
+  --dm-color-warning: #fbbf24;
+  --dm-color-danger: #f87171;
+  --dm-color-ring: #1d4ed8;
+  --dm-color-card: #111827;
+  --dm-color-overlay: rgb(0 0 0 / 0.55);
+
+  --dm-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.35);
+  --dm-shadow-md: 0 4px 16px rgb(0 0 0 / 0.35);
+  --dm-shadow-lg: 0 12px 40px rgb(0 0 0 / 0.45);
+}
+
+@theme inline {
+  --color-background: var(--dm-color-background);
+  --color-foreground: var(--dm-color-foreground);
+  --color-muted: var(--dm-color-muted);
+  --color-border: var(--dm-color-border);
+  --color-accent: var(--dm-color-accent);
+  --color-accent-hover: var(--dm-color-accent-hover);
+  --color-accent-muted: var(--dm-color-accent-muted);
+  --color-success: var(--dm-color-success);
+  --color-warning: var(--dm-color-warning);
+  --color-danger: var(--dm-color-danger);
+  --color-ring: var(--dm-color-ring);
+  --color-card: var(--dm-color-card);
+
+  --radius-sm: var(--dm-radius-sm);
+  --radius-md: var(--dm-radius-md);
+  --radius-lg: var(--dm-radius-lg);
+  --radius-xl: var(--dm-radius-xl);
+
+  --shadow-sm: var(--dm-shadow-sm);
+  --shadow-md: var(--dm-shadow-md);
+  --shadow-lg: var(--dm-shadow-lg);
+
+  --font-sans: var(--dm-font-sans);
+  --font-mono: var(--dm-font-mono);
+}

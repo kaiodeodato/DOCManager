@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@import "@ac/ui/tokens.css";
+@import "@ac/ui/components.css";
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--dm-color-background);
+  color: var(--dm-color-foreground);
+  font-family: var(--dm-font-sans);
+}
+
+/* Theme toggle ready: set `class="dark"` or `data-theme="dark"` on <html>. */
+
+/* UI13 motion utilities (also in @ac/ui components.css — kept local for app pages) */
+@keyframes dm-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dm-fade-in {
+  animation: dm-fade-in 0.45s ease-out both;
+}
+
+.dm-hover-lift {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.dm-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--dm-shadow-md, 0 8px 24px rgb(15 23 42 / 0.08));
+}
+
+@keyframes dm-counter-pulse {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.dm-counter {
+  animation: dm-counter-pulse 0.6s ease-out both;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-fade-in,
+  .dm-hover-lift,
+  .dm-counter {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}

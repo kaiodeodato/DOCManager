@@ -1,0 +1,27 @@
+{
+  "name": "@ac/worker-ocr",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "start": "node dist/index.js",
+    "lint": "eslint src --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test dist/index.test.js dist/preprocess.test.js dist/extractions.test.js dist/classify.test.js dist/deepseek.test.js dist/pdf/ops.test.js",
+    "fixtures": "node dist/scripts/generate-fixtures.js",
+    "calibrate": "node dist/calibration/run.js"
+  },
+  "dependencies": {
+    "@ac/shared": "*",
+    "@supabase/supabase-js": "^2.111.0",
+    "pdf-lib": "^1.17.1",
+    "sharp": "^0.34.2",
+    "tesseract.js": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
+  }
+}

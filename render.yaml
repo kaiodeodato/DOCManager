@@ -1,0 +1,43 @@
+# Render blueprint — DOC Manager workers + web
+services:
+  - type: web
+    name: doc-manager-web
+    runtime: node
+    rootDir: .
+    buildCommand: npm ci && npm run build -- --filter=@ac/web
+    startCommand: npm run start --workspace=@ac/web
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+
+  - type: worker
+    name: doc-manager-worker-ocr
+    runtime: node
+    rootDir: .
+    buildCommand: npm ci && npm run build -- --filter=@ac/worker-ocr
+    startCommand: npm run start --workspace=@ac/worker-ocr
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: OCR_GRAYSCALE
+        value: "1"
+      - key: OCR_NORMALIZE
+        value: "1"
+      - key: OCR_SHARPEN
+        value: "1"
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: WORKER_OCR_POLL
+        value: "1"
+
+  - type: worker
+    name: doc-manager-worker-notify
+    runtime: node
+    rootDir: .
+    buildCommand: npm ci && npm run build -- --filter=@ac/worker-notify
+    startCommand: npm run start --workspace=@ac/worker-notify
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: WORKER_NOTIFY_POLL
+        value: "1"
