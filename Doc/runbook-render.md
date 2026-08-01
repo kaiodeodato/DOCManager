@@ -10,7 +10,7 @@
 
 ## Variáveis
 
-- `NODE_VERSION=20`
+- `NODE_VERSION=22`
 - Web: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (quando Auth ligar)
 - Workers: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEEPSEEK_API_KEY` (ocr/classify)
 - Notify: `SMTP_URL` (opcional), `TWILIO_*` (opcional) — **não** definir `NOTIFY_ALLOW_SMTP` / `NOTIFY_ALLOW_TWILIO` até smoke manual

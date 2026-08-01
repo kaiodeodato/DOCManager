@@ -9,7 +9,7 @@ services:
     startCommand: npm run start --workspace=@ac/web
     envVars:
       - key: NODE_VERSION
-        value: "20"
+        value: "22"
 
   - type: worker
     name: doc-manager-worker-ocr
@@ -19,7 +19,7 @@ services:
     startCommand: npm run start --workspace=@ac/worker-ocr
     envVars:
       - key: NODE_VERSION
-        value: "20"
+        value: "22"
       - key: OCR_GRAYSCALE
         value: "1"
       - key: OCR_NORMALIZE
@@ -39,6 +39,6 @@ services:
     startCommand: npm run start --workspace=@ac/worker-notify
     envVars:
       - key: NODE_VERSION
-        value: "20"
+        value: "22"
       - key: WORKER_NOTIFY_POLL
         value: "1"
