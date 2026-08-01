@@ -4,9 +4,9 @@
 
 | Serviço | Tipo | Build | Start |
 |---------|------|-------|-------|
-| `doc-manager-web` | web | `npm ci && npm run build -- --filter=@ac/web` | `npm run start --workspace=@ac/web` |
-| `doc-manager-worker-ocr` | worker | `npm ci && npm run build -- --filter=@ac/worker-ocr` | `npm run start --workspace=@ac/worker-ocr` |
-| `doc-manager-worker-notify` | worker (adicionar) | `npm ci && npm run build -- --filter=@ac/worker-notify` | `WORKER_NOTIFY_POLL=1 npm run start --workspace=@ac/worker-notify` |
+| `doc-manager-web` | web | `npm ci --include=dev && npx turbo run build --filter=@ac/web` | `npm run start --workspace=@ac/web` |
+| `doc-manager-worker-ocr` | worker | `npm ci --include=dev && npx turbo run build --filter=@ac/worker-ocr` | `npm run start --workspace=@ac/worker-ocr` |
+| `doc-manager-worker-notify` | worker (adicionar) | `npm ci --include=dev && npx turbo run build --filter=@ac/worker-notify` | `npm run start --workspace=@ac/worker-notify` |
 
 ## Variáveis
 

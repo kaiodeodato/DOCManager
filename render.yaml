@@ -4,7 +4,8 @@ services:
     name: doc-manager-web
     runtime: node
     rootDir: .
-    buildCommand: npm ci && npm run build -- --filter=@ac/web
+    # --include=dev: Render sets NODE_ENV=production and skips turbo/typescript otherwise
+    buildCommand: npm ci --include=dev && npx turbo run build --filter=@ac/web
     startCommand: npm run start --workspace=@ac/web
     envVars:
       - key: NODE_VERSION
@@ -14,7 +15,7 @@ services:
     name: doc-manager-worker-ocr
     runtime: node
     rootDir: .
-    buildCommand: npm ci && npm run build -- --filter=@ac/worker-ocr
+    buildCommand: npm ci --include=dev && npx turbo run build --filter=@ac/worker-ocr
     startCommand: npm run start --workspace=@ac/worker-ocr
     envVars:
       - key: NODE_VERSION
@@ -34,7 +35,7 @@ services:
     name: doc-manager-worker-notify
     runtime: node
     rootDir: .
-    buildCommand: npm ci && npm run build -- --filter=@ac/worker-notify
+    buildCommand: npm ci --include=dev && npx turbo run build --filter=@ac/worker-notify
     startCommand: npm run start --workspace=@ac/worker-notify
     envVars:
       - key: NODE_VERSION
