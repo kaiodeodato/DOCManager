@@ -106,7 +106,6 @@ export default async function DocumentDetailPage({
                       className="h-[70vh] w-full bg-white"
                     />
                   ) : previewUrl && image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={previewUrl}
                       alt={doc.originalFilename}
