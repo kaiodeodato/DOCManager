@@ -7,8 +7,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npx turbo run build",
-    "build:web": "npm run build -w lucide-react && npm run build -w @ac/shared && npm run build -w @ac/ui && npm run build -w @ac/web",
+    "build": "node scripts/build-web.mjs",
+    "build:web": "node scripts/build-web.mjs",
     "build:worker-ocr": "npm run build -w @ac/shared && npm run build -w @ac/worker-ocr",
     "build:worker-notify": "npm run build -w @ac/shared && npm run build -w @ac/worker-notify",
     "dev": "npx turbo run dev",
