@@ -79,10 +79,23 @@ export default function DocumentsListPage() {
   }, [refresh]);
 
   const onFileSelected = async (file: File) => {
+    if (file.size > 50 * 1024 * 1024) {
+      throw new Error("File exceeds 50MB limit");
+    }
     const body = new FormData();
     body.set("file", file);
     const response = await fetch("/api/documents/upload", { method: "POST", body });
-    if (!response.ok) throw new Error("Upload rejected");
+    if (!response.ok) {
+      let detail = `Upload failed (${response.status})`;
+      try {
+        const payload = (await response.json()) as { error?: unknown };
+        if (typeof payload.error === "string") detail = payload.error;
+        else if (payload.error != null) detail = JSON.stringify(payload.error);
+      } catch {
+        /* keep status text */
+      }
+      throw new Error(detail);
+    }
     await refresh();
   };
 

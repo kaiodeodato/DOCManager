@@ -1,3 +1,4 @@
+import { createAdminSupabaseClient } from "../supabase/admin";
 import { createServerSupabaseClient } from "../supabase/server";
 
 export type UserOrgContext = {
@@ -22,6 +23,11 @@ export async function getSession() {
   return data.session;
 }
 
+function asRole(role: string): UserOrgContext["role"] | null {
+  if (role === "owner" || role === "accountant" || role === "viewer") return role;
+  return null;
+}
+
 export async function getUserOrgContext(): Promise<UserOrgContext | null> {
   const supabase = await createServerSupabaseClient();
   const { data: authData, error: authError } = await supabase.auth.getUser();
@@ -36,17 +42,56 @@ export async function getUserOrgContext(): Promise<UserOrgContext | null> {
     .maybeSingle();
 
   if (membershipError || !membership) return null;
-  if (
-    membership.role !== "owner" &&
-    membership.role !== "accountant" &&
-    membership.role !== "viewer"
-  ) {
-    return null;
-  }
+  const role = asRole(membership.role);
+  if (!role) return null;
 
   return {
     userId: authData.user.id,
     orgId: membership.org_id,
-    role: membership.role,
+    role,
   };
+}
+
+/** Like getUserOrgContext, but creates an org+membership if the user has none. */
+export async function ensureUserOrgContext(): Promise<UserOrgContext | null> {
+  const existing = await getUserOrgContext();
+  if (existing) return existing;
+
+  const user = await getUser();
+  if (!user) return null;
+
+  const admin = createAdminSupabaseClient();
+  const { data: membership } = await admin
+    .from("org_members")
+    .select("org_id, role")
+    .eq("user_id", user.id)
+    .order("created_at")
+    .limit(1)
+    .maybeSingle();
+
+  if (membership) {
+    const role = asRole(membership.role);
+    if (!role) return null;
+    return { userId: user.id, orgId: membership.org_id, role };
+  }
+
+  const organizationName = `${user.user_metadata.full_name ?? user.email ?? "DOC Manager"} workspace`;
+  const { data: org, error: orgError } = await admin
+    .from("orgs")
+    .insert({ name: organizationName })
+    .select("id")
+    .single();
+  if (orgError || !org) return null;
+
+  const { error: memberError } = await admin.from("org_members").insert({
+    org_id: org.id,
+    user_id: user.id,
+    role: "owner",
+  });
+  if (memberError) {
+    await admin.from("orgs").delete().eq("id", org.id);
+    return null;
+  }
+
+  return { userId: user.id, orgId: org.id, role: "owner" };
 }
