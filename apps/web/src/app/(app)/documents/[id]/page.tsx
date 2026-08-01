@@ -9,6 +9,17 @@ import {
 } from "@ac/ui";
 import { getUserOrgContext } from "@/lib/auth/server";
 import { getPersistedDocument } from "@/lib/document-repository";
+import { createSignedUrl } from "@/lib/storage/signed-url";
+
+function isPdf(mimeType: string | null, filename: string): boolean {
+  if (mimeType === "application/pdf") return true;
+  return filename.toLowerCase().endsWith(".pdf");
+}
+
+function isImage(mimeType: string | null, filename: string): boolean {
+  if (mimeType?.startsWith("image/")) return true;
+  return /\.(jpe?g|png|webp|gif|tiff?)$/i.test(filename);
+}
 
 export default async function DocumentDetailPage({
   params,
@@ -23,6 +34,24 @@ export default async function DocumentDetailPage({
     notFound();
   }
 
+  let previewUrl: string | null = null;
+  let previewError: string | null = null;
+  try {
+    const signed = await createSignedUrl({
+      storagePath: doc.storagePath,
+      expiresInSeconds: 3600,
+    });
+    previewUrl = signed.mode === "fake" ? null : signed.url;
+    if (signed.mode === "fake") {
+      previewError = "Storage is not configured for preview.";
+    }
+  } catch (err) {
+    previewError = err instanceof Error ? err.message : "Preview unavailable";
+  }
+
+  const pdf = isPdf(doc.mimeType, doc.originalFilename);
+  const image = isImage(doc.mimeType, doc.originalFilename);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -35,6 +64,11 @@ export default async function DocumentDetailPage({
           </div>
         </div>
         <div className="flex gap-2">
+          {previewUrl ? (
+            <a href={previewUrl} target="_blank" rel="noreferrer">
+              <Button variant="secondary">Open file</Button>
+            </a>
+          ) : null}
           <a href="/ocr/review"><Button variant="secondary">Open OCR review</Button></a>
           <a href="/approvals"><Button variant="primary">Send to approval</Button></a>
         </div>
@@ -48,8 +82,37 @@ export default async function DocumentDetailPage({
             content: (
               <Card className="min-h-72 p-6">
                 <CardHeader title="Document preview" description={doc.originalFilename} />
-                <div className="mt-4 flex min-h-56 items-center justify-center rounded-xl border border-dashed border-[var(--dm-color-border)] bg-[var(--dm-color-accent-muted)] text-sm text-[var(--dm-color-muted)]">
-                  Preview is available through a signed Storage URL.
+                <div className="mt-4 overflow-hidden rounded-xl border border-[var(--dm-color-border)] bg-[var(--dm-color-accent-muted)]">
+                  {previewUrl && pdf ? (
+                    <iframe
+                      title={doc.originalFilename}
+                      src={previewUrl}
+                      className="h-[70vh] w-full bg-white"
+                    />
+                  ) : previewUrl && image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={previewUrl}
+                      alt={doc.originalFilename}
+                      className="mx-auto max-h-[70vh] w-auto object-contain p-4"
+                    />
+                  ) : previewUrl ? (
+                    <div className="flex min-h-56 flex-col items-center justify-center gap-3 p-6 text-sm text-[var(--dm-color-muted)]">
+                      <p>Inline preview is not available for this file type.</p>
+                      <a
+                        href={previewUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-medium text-[var(--dm-color-accent)] underline"
+                      >
+                        Open signed URL
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="flex min-h-56 items-center justify-center p-6 text-sm text-[var(--dm-color-muted)]">
+                      {previewError ?? "Preview unavailable"}
+                    </div>
+                  )}
                 </div>
               </Card>
             ),

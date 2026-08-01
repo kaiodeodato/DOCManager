@@ -8,6 +8,7 @@ type DocumentDbRow = {
   original_filename: string;
   status: string;
   storage_path: string;
+  mime_type: string | null;
   document_type: string | null;
   cost_center: string | null;
   ocr_text: string | null;
@@ -20,6 +21,7 @@ export type PersistedDocument = {
   originalFilename: string;
   status: string;
   storagePath: string;
+  mimeType: string | null;
   documentType: string | null;
   costCenter: string | null;
   ocrText: string | null;
@@ -33,6 +35,7 @@ export function mapDocumentRow(row: DocumentDbRow): PersistedDocument {
     originalFilename: row.original_filename,
     status: row.status,
     storagePath: row.storage_path,
+    mimeType: row.mime_type,
     documentType: row.document_type,
     costCenter: row.cost_center,
     ocrText: row.ocr_text,
@@ -41,7 +44,7 @@ export function mapDocumentRow(row: DocumentDbRow): PersistedDocument {
 }
 
 const DOCUMENT_COLUMNS =
-  "id, org_id, original_filename, status, storage_path, document_type, cost_center, ocr_text, created_at";
+  "id, org_id, original_filename, status, storage_path, mime_type, document_type, cost_center, ocr_text, created_at";
 
 export async function listPersistedDocuments(orgId: string): Promise<PersistedDocument[]> {
   // Admin read scoped by orgId already resolved from auth membership.
@@ -60,7 +63,7 @@ export async function getPersistedDocument(
   orgId: string,
   id: string,
 ): Promise<PersistedDocument | null> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   const { data, error } = await supabase
     .from("documents")
     .select(DOCUMENT_COLUMNS)

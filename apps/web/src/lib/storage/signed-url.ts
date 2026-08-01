@@ -1,7 +1,9 @@
 /**
- * Signed URL helper for external document sharing (E9.01).
+ * Signed URL helper for document preview and external sharing (E9.01).
  * Uses SUPABASE_* env when present; otherwise returns a deterministic fake URL for tests/CI.
  */
+
+import { createClient } from "@supabase/supabase-js";
 
 export type SignedUrlOptions = {
   storagePath: string;
@@ -31,7 +33,7 @@ function readSupabaseConfig(): { url: string; key: string } | null {
 
 /**
  * Create a time-limited signed URL for a storage object.
- * Stub: when Supabase env is missing, returns `https://signed.local/...` for tests.
+ * When Supabase env is missing, returns `https://signed.local/...` for tests.
  */
 export async function createSignedUrl(
   options: SignedUrlOptions,
@@ -52,13 +54,19 @@ export async function createSignedUrl(
     };
   }
 
-  // Lightweight stub that shapes like Supabase Storage signed URL without network I/O in CI.
-  // Real createSignedUrl can replace this when Storage client is wired.
-  const token = Buffer.from(`${cfg.key.slice(0, 8)}:${options.storagePath}`).toString(
-    "base64url",
-  );
+  const supabase = createClient(cfg.url, cfg.key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(options.storagePath, expiresIn);
+
+  if (error || !data?.signedUrl) {
+    throw new Error(error?.message ?? "signed_url_failed");
+  }
+
   return {
-    url: `${cfg.url}/storage/v1/object/sign/${bucket}/${options.storagePath}?token=${token}`,
+    url: data.signedUrl,
     expiresAt,
     mode: "supabase",
   };
