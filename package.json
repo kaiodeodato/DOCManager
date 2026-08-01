@@ -19,7 +19,6 @@
     "db:types": "node scripts/db-types.mjs"
   },
   "dependencies": {
-    "@turbo/linux-64": "2.10.8",
     "turbo": "2.10.8",
     "typescript": "^5.8.2"
   },
