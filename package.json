@@ -8,6 +8,9 @@
   ],
   "scripts": {
     "build": "npx turbo run build",
+    "build:web": "npm run build -w lucide-react && npm run build -w @ac/shared && npm run build -w @ac/ui && npm run build -w @ac/web",
+    "build:worker-ocr": "npm run build -w @ac/shared && npm run build -w @ac/worker-ocr",
+    "build:worker-notify": "npm run build -w @ac/shared && npm run build -w @ac/worker-notify",
     "dev": "npx turbo run dev",
     "lint": "npx turbo run lint",
     "test": "npx turbo run test",
@@ -16,7 +19,8 @@
     "db:types": "node scripts/db-types.mjs"
   },
   "dependencies": {
-    "turbo": "^2.4.4",
+    "@turbo/linux-64": "2.10.8",
+    "turbo": "2.10.8",
     "typescript": "^5.8.2"
   },
   "devDependencies": {
@@ -28,6 +32,19 @@
   },
   "engines": {
     "node": ">=20.9.0"
+  },
+  "supportedArchitectures": {
+    "os": [
+      "current",
+      "win32",
+      "linux",
+      "darwin"
+    ],
+    "cpu": [
+      "current",
+      "x64",
+      "arm64"
+    ]
   },
   "overrides": {
     "jspdf": "4.2.1",
