@@ -17,7 +17,7 @@
     "@ac/ui": "*",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.111.0",
-    "jspdf": "^3.0.4",
+    "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
     "lucide-react": "*",
     "next": "^15.2.4",
