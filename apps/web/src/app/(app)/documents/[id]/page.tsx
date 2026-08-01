@@ -9,7 +9,9 @@ import {
 } from "@ac/ui";
 import { getUserOrgContext } from "@/lib/auth/server";
 import { getPersistedDocument } from "@/lib/document-repository";
+import { getLatestOcrJob, processOneOcrJob } from "@/lib/ocr/run-pending";
 import { createSignedUrl } from "@/lib/storage/signed-url";
+import { DocumentOcrActions } from "./ocr-actions";
 
 function isPdf(mimeType: string | null, filename: string): boolean {
   if (mimeType === "application/pdf") return true;
@@ -29,9 +31,23 @@ export default async function DocumentDetailPage({
   const context = await getUserOrgContext();
   if (!context) notFound();
   const { id } = await params;
-  const doc = await getPersistedDocument(context.orgId, id);
+  let doc = await getPersistedDocument(context.orgId, id);
   if (!doc) {
     notFound();
+  }
+
+  let ocrJob = await getLatestOcrJob(context.orgId, id);
+
+  // If upload left a pending OCR job and no worker is running, process it here.
+  if (!doc.ocrText && (doc.status === "received" || ocrJob?.status === "pending")) {
+    try {
+      await processOneOcrJob({ orgId: context.orgId, documentId: id });
+      doc = (await getPersistedDocument(context.orgId, id)) ?? doc;
+      ocrJob = await getLatestOcrJob(context.orgId, id);
+    } catch {
+      /* surface job error below */
+      ocrJob = await getLatestOcrJob(context.orgId, id);
+    }
   }
 
   let previewUrl: string | null = null;
@@ -123,6 +139,28 @@ export default async function DocumentDetailPage({
             content: (
               <Card className="p-6">
                 <CardHeader title="OCR metadata" description={doc.status} />
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-[var(--dm-color-muted)]">
+                  {ocrJob ? (
+                    <>
+                      <span>Job: {ocrJob.status}</span>
+                      {ocrJob.last_error ? (
+                        <span className="text-red-600">Error: {ocrJob.last_error}</span>
+                      ) : null}
+                    </>
+                  ) : (
+                    <span>No OCR job found</span>
+                  )}
+                  <DocumentOcrActions
+                    documentId={doc.id}
+                    canRetry={
+                      !doc.ocrText ||
+                      doc.status === "received" ||
+                      doc.status === "ocr_failed" ||
+                      ocrJob?.status === "pending" ||
+                      ocrJob?.status === "failed"
+                    }
+                  />
+                </div>
                 <pre className="mt-4 overflow-auto rounded-xl bg-slate-950 p-4 text-sm text-slate-100">
                   {doc.ocrText ?? "OCR pending…"}
                 </pre>

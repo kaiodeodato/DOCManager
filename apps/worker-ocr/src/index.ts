@@ -287,6 +287,7 @@ const isDirectRun =
   process.argv[1] &&
   (process.argv[1].endsWith("index.js") || process.argv[1].endsWith("index.ts"));
 
-if (isDirectRun && process.env.WORKER_OCR_POLL === "1") {
+// Poll by default when started as the process entrypoint (set WORKER_OCR_POLL=0 to disable).
+if (isDirectRun && process.env.WORKER_OCR_POLL !== "0") {
   void main();
 }

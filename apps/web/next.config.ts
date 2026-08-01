@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@ac/shared", "@ac/ui", "lucide-react"],
   reactStrictMode: true,
   outputFileTracingRoot: monorepoRoot,
+  serverExternalPackages: ["sharp", "tesseract.js", "pdfjs-dist"],
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,

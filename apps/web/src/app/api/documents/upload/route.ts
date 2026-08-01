@@ -97,16 +97,35 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ error: jobError.message }, { status: 500 });
     }
 
+    // Kick OCR in-process so metadata appears even without a separate worker.
+    let ocr: {
+      processed: boolean;
+      documentId?: string;
+      status?: string;
+      error?: string;
+      textPreview?: string;
+    } | null = null;
+    try {
+      const { processOneOcrJob } = await import("@/lib/ocr/run-pending");
+      ocr = await processOneOcrJob({
+        orgId: context.orgId,
+        documentId,
+      });
+    } catch {
+      ocr = null;
+    }
+
     return Response.json(
       {
         document: {
           id: document.id,
           orgId: document.org_id,
           storagePath: document.storage_path,
-          status: document.status,
+          status: ocr?.status ?? document.status,
           originalFilename: document.original_filename,
         },
         job,
+        ocr,
       },
       { status: 201 },
     );
