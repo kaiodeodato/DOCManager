@@ -1,8 +1,9 @@
-import { getUserOrgContext } from "@/lib/auth/server";
+import { ensureUserOrgContext } from "@/lib/auth/server";
 import { listPersistedDocuments } from "@/lib/document-repository";
 
 export async function GET(): Promise<Response> {
-  const context = await getUserOrgContext();
+  // Match upload: resolve or create workspace so list works after first upload.
+  const context = await ensureUserOrgContext();
   if (!context) return Response.json({ error: "unauthorized" }, { status: 401 });
 
   try {

@@ -1,4 +1,5 @@
 import "server-only";
+import { createAdminSupabaseClient } from "./supabase/admin";
 import { createServerSupabaseClient } from "./supabase/server";
 
 type DocumentDbRow = {
@@ -43,7 +44,9 @@ const DOCUMENT_COLUMNS =
   "id, org_id, original_filename, status, storage_path, document_type, cost_center, ocr_text, created_at";
 
 export async function listPersistedDocuments(orgId: string): Promise<PersistedDocument[]> {
-  const supabase = await createServerSupabaseClient();
+  // Admin read scoped by orgId already resolved from auth membership.
+  // Matches upload (service role write) so list is not empty when user RLS hides rows.
+  const supabase = createAdminSupabaseClient();
   const { data, error } = await supabase
     .from("documents")
     .select(DOCUMENT_COLUMNS)

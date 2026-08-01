@@ -28,12 +28,22 @@ function asRole(role: string): UserOrgContext["role"] | null {
   return null;
 }
 
+function toContext(
+  userId: string,
+  membership: { org_id: string; role: string } | null,
+): UserOrgContext | null {
+  if (!membership) return null;
+  const role = asRole(membership.role);
+  if (!role) return null;
+  return { userId, orgId: membership.org_id, role };
+}
+
 export async function getUserOrgContext(): Promise<UserOrgContext | null> {
   const supabase = await createServerSupabaseClient();
   const { data: authData, error: authError } = await supabase.auth.getUser();
   if (authError || !authData.user) return null;
 
-  const { data: membership, error: membershipError } = await supabase
+  const { data: membership } = await supabase
     .from("org_members")
     .select("org_id, role")
     .eq("user_id", authData.user.id)
@@ -41,15 +51,20 @@ export async function getUserOrgContext(): Promise<UserOrgContext | null> {
     .limit(1)
     .maybeSingle();
 
-  if (membershipError || !membership) return null;
-  const role = asRole(membership.role);
-  if (!role) return null;
+  const fromRls = toContext(authData.user.id, membership);
+  if (fromRls) return fromRls;
 
-  return {
-    userId: authData.user.id,
-    orgId: membership.org_id,
-    role,
-  };
+  // RLS / JWT quirks can hide membership; service role still resolves it.
+  const admin = createAdminSupabaseClient();
+  const { data: adminMembership } = await admin
+    .from("org_members")
+    .select("org_id, role")
+    .eq("user_id", authData.user.id)
+    .order("created_at")
+    .limit(1)
+    .maybeSingle();
+
+  return toContext(authData.user.id, adminMembership);
 }
 
 /** Like getUserOrgContext, but creates an org+membership if the user has none. */
@@ -61,20 +76,6 @@ export async function ensureUserOrgContext(): Promise<UserOrgContext | null> {
   if (!user) return null;
 
   const admin = createAdminSupabaseClient();
-  const { data: membership } = await admin
-    .from("org_members")
-    .select("org_id, role")
-    .eq("user_id", user.id)
-    .order("created_at")
-    .limit(1)
-    .maybeSingle();
-
-  if (membership) {
-    const role = asRole(membership.role);
-    if (!role) return null;
-    return { userId: user.id, orgId: membership.org_id, role };
-  }
-
   const organizationName = `${user.user_metadata.full_name ?? user.email ?? "DOC Manager"} workspace`;
   const { data: org, error: orgError } = await admin
     .from("orgs")
